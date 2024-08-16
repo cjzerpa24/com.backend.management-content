@@ -2,7 +2,7 @@
 DOCKER_COMP = docker-compose
 
 # Docker containers
-PHP_CONT = $(DOCKER_COMP) exec core
+PHP_CONT = $(DOCKER_COMP) exec php
 
 # Executables
 PHP      = $(PHP_CONT) php
@@ -22,7 +22,7 @@ build: ## Builds the Docker images
 	@$(DOCKER_COMP) build --pull --no-cache
 
 up: ## Start the docker hub in detached mode (no logs)
-	@$(DOCKER_COMP) up -d
+	@$(DOCKER_COMP) up -d --build
 
 start: build up ## Build and start the containers
 
