@@ -9,6 +9,8 @@ use App\Repository\UserRepositoryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,6 +33,14 @@ class CreateContentController extends AbstractController
      * @throws JWTDecodeFailureException
      */
     #[Route(path: '/api/content', name: 'app_content_create', methods: ['POST'])]
+    #[OA\Tag(name: 'Content')]
+    #[OA\Post(
+        description: 'Register new Content',
+        summary: 'Register Content'
+    )]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(ref: new Model(type: CreateContentDTO::class)),
+    )]
     public function action(Request $request, TokenStorageInterface $tokenStorage): JsonResponse
     {
         $userEmail = $this->tokenManager->decode($tokenStorage->getToken())['email'];
