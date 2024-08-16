@@ -2,7 +2,7 @@
 DOCKER_COMP = docker-compose
 
 # Docker containers
-PHP_CONT = $(DOCKER_COMP) exec core
+PHP_CONT = $(DOCKER_COMP) exec php
 
 # Executables
 PHP      = $(PHP_CONT) php
