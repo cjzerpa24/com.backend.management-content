@@ -2,7 +2,7 @@
 
 namespace App\Controller\User;
 
-use App\DTO\GetProfileDTO;
+use App\DTO\User\GetProfileDTO;
 use App\Repository\UserRepositoryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
