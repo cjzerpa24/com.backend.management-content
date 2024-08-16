@@ -1,50 +1,54 @@
 <?php
 
-namespace App\Controller\User;
+namespace App\Controller\Content;
 
-use App\DTO\User\UpdateUserDTO;
+use App\DTO\Content\CreateContentDTO;
+use App\Entity\Content;
+use App\Repository\ContentRepositoryInterface;
 use App\Repository\UserRepositoryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class UpdateUserController extends AbstractController
+class CreateContentController extends AbstractController
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
+        private readonly ContentRepositoryInterface $contentRepository,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
+        private readonly UserRepositoryInterface $userRepository,
         private readonly JWTTokenManagerInterface $tokenManager,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws JWTDecodeFailureException
      */
-    #[Route('/api/user', name: 'app_update_user', methods: ['PUT'])]
-    public function action(Request $request, TokenStorageInterface $jwtStorage): JsonResponse
+    #[Route(path: '/api/content', name: 'app_content_create', methods: ['POST'])]
+    #[OA\Tag(name: 'Content')]
+    #[OA\Post(
+        description: 'Register new Content',
+        summary: 'Register Content'
+    )]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(ref: new Model(type: CreateContentDTO::class)),
+    )]
+    public function action(Request $request, TokenStorageInterface $tokenStorage): JsonResponse
     {
-        // Extract from token the user email
-        $tokenData = $this->tokenManager->decode($jwtStorage->getToken());
-        $email = $tokenData['email'];
+        $userEmail = $this->tokenManager->decode($tokenStorage->getToken())['email'];
+        $user = $this->userRepository->findByEmail($userEmail);
 
-        // Search in DB user given email
-        $user = $this->userRepository->findByEmail($email);
-        if (!$user) {
-            return $this->json('User not found', 404);
-        }
-
-        // Deserialize the request body into a DTO
         $dto = $this->serializer->deserialize(
             $request->getContent(),
-            UpdateUserDTO::class,
+            CreateContentDTO::class,
             'json',
             [
                 AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false,
@@ -60,14 +64,18 @@ class UpdateUserController extends AbstractController
         }
 
         try {
-            $user->setName($dto->name)
-                ->setEmail($dto->email);
-            $this->userRepository->update($user);
+            $content = (new Content())
+                ->setTitle($dto->title)
+                ->setDescription($dto->description)
+                ->setUser($user);
+
+            $this->contentRepository->save($content);
         } catch (\Exception $e) {
+            // If there is an error, return a 500 Internal Server Error response
             return $this->json(['error' => $e->getMessage()], 500);
         }
 
-        return $this->json(['message' => 'User updated successfully'], 202);
+        // Return a 201 Created response
+        return $this->json(['message' => 'Content registered successfully'], 201);
     }
 }
-

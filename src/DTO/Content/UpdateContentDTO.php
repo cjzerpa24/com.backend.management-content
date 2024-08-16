@@ -1,17 +1,17 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\Content;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UpdateUserDTO
+class UpdateContentDTO
 {
     public function __construct(
         #[Assert\NotBlank]
-        #[Assert\Email]
-        public string $email,
+        #[Assert\Length(max: 255)]
+        public string $title,
         #[Assert\NotBlank]
         #[Assert\Length(max: 255)]
-        public string $name,
+        public string $description,
     ) {}
 }
