@@ -4,7 +4,7 @@ namespace App\Controller\User;
 
 use App\DTO\RegisterUserDTO;
 use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 class RegisterUserController extends AbstractController
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
+        private readonly UserRepositoryInterface $userRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
@@ -53,6 +53,7 @@ class RegisterUserController extends AbstractController
             // Create a new user object
             $user = new User();
             $user->setEmail($dto->email);
+            $user->setName($dto->name);
             $user->setPassword($this->userPasswordHasher->hashPassword($user, $dto->password));
             $user->setRoles(['ROLE_USER']);
             // Save the user to the database
