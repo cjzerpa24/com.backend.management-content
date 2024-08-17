@@ -71,6 +71,15 @@ Start the containers defined in docker-compose.yml
     sf doctrine:migrations:migrate
 ````
 
+### * Generate keys for authentication token
+Generate the private and public key for the authentication part you should execute inside php container
+
+```bash
+    sf lexik:jwt:generate-keypair
+```
+
+It should generate inside the folder `config/` a new folder named `jwt/`, and it should contain the `private.key` file and `public.key` file
+
 4. Access the Application
    Once the containers are up and running, you can access your Symfony application in your web browser or using Postman application at:
 
